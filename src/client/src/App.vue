@@ -22,6 +22,8 @@ import Main from './components/Main.vue'
 <style lang="scss">
 @use "normalize.css/normalize.css";
 
+@import url("https://fonts.googleapis.com/css2?family=Sofia&display=swap");
+
 $footer-height: 36px;
 
 body {
@@ -57,11 +59,13 @@ header {
   h1 {
     margin: 0;
     line-height: 1;
-    font-size: 2.5rem;
+    font-size: 58px;
+    font-family: "Sofia", cursive;
   }
 
   p {
     margin: 10px 0 0 0;
+    font-size: 16px;
   }
 }
 
