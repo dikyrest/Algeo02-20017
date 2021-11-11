@@ -4,14 +4,9 @@ from PIL import Image
 # FUNCTION DEFINTIONS:
 # Membuka gambar dan mengembalikan matriks berdasarkan channel (Red, Green, dan Blue)
 def openImage(imagePath):
-    imOrig = Image.open(imagePath)
-    im = np.array(imOrig)
-
-    aRed = im[:, :, 0]
-    aGreen = im[:, :, 1]
-    aBlue = im[:, :, 2]
-
-    return [aRed, aGreen, aBlue, imOrig]
+    imageOrigin = Image.open(imagePath)
+    imageMatriks = np.array(imageOrigin)
+    return [imageMatriks[:, :, 0], imageMatriks[:, :, 1], imageMatriks[:, :, 2], imageOrigin]
 
 # Kompresi gambar dengan single channel
 def compressSingleChannel(channelDataMatrix, singularValuesLimit):
@@ -35,11 +30,11 @@ def find_eig_qr(A):
     return np.diag(X), pQ
 
 # MAIN PROGRAM:
-print('*** Image Compression using SVD - a demo\n')
+print('*** Image Compression Using SVD Method ***\n')
 
 # Input nama file
-filename = input("Masukkan nama file: ")
-aRed, aGreen, aBlue, originalImage = openImage(filename)
+#filename = input("Masukkan nama file: ")
+matriksMerah, matriksHijau, matriksBiru, originalImage = openImage("lena.png")
 
 # Image width and height
 imageWidth, imageHeight = originalImage.size
@@ -57,9 +52,9 @@ compressedSize = int ((100-ratio)/100*originalSize)
 # Menghitung jumlah nilai singular yang dapat digunakan
 singularValuesLimit = int (compressedSize/(3*(1 + mr + mc)))
 
-aRedCompressed = compressSingleChannel(aRed, singularValuesLimit)
-aGreenCompressed = compressSingleChannel(aGreen, singularValuesLimit)
-aBlueCompressed = compressSingleChannel(aBlue, singularValuesLimit)
+aRedCompressed = compressSingleChannel(matriksMerah, singularValuesLimit)
+aGreenCompressed = compressSingleChannel(matriksHijau, singularValuesLimit)
+aBlueCompressed = compressSingleChannel(matriksBiru, singularValuesLimit)
 
 imr = Image.fromarray(aRedCompressed, mode=None)
 img = Image.fromarray(aGreenCompressed, mode=None)
