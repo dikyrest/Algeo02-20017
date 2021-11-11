@@ -15,19 +15,21 @@ const afterImg = ref('')
 const isCompressing = ref(false)
 const isLoading = ref(false)
 
-const onFileChange = ({ file }) => {
+const onFileChange = async ({ file }) => {
   isLoading.value = true
 
   fname.value = file.name
   beforeImg.value = URL.createObjectURL(file.file)
 
-  const compressed = getCompressedImage(file.file)
-  afterImg.value = URL.createObjectURL(file.file)
-
-  setTimeout(() => {
+  try {
+    const compressed = await getCompressedImage(file.file)
+    afterImg.value = URL.createObjectURL(compressed.file)
+  } catch (e) {
+    // TODO: handle error
+  } finally {
     isLoading.value = false
     isCompressing.value = true
-  }, 1000)
+  }
 }
 
 const reset = () => {
