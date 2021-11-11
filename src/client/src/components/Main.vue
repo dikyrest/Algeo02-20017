@@ -17,8 +17,11 @@ const isLoading = ref(false)
 
 const onFileChange = ({ file }) => {
   isLoading.value = true
+
   fname.value = file.name
   beforeImg.value = URL.createObjectURL(file.file)
+
+  const compressed = getCompressedImage(file.file)
   afterImg.value = URL.createObjectURL(file.file)
 
   setTimeout(() => {

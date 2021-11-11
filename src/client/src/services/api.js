@@ -1,6 +1,7 @@
 import Axios from 'axios'
 
 const instance = Axios.create({
+  baseURL: '__API_BASE__',
   timeout: 10000,
 })
 
