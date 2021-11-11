@@ -11,7 +11,7 @@ Kelompok 46 Kompres Air Hangat
 
 - Client    : Vue 3, Vite, Naive UI, Axios
 - Server    : Flask, flask_cors
-- Algoritma : numpy
+- Algoritma : numpy, pillow
 
 
 ## Run
