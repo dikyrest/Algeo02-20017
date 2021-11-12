@@ -16,9 +16,7 @@ def find_eig(A):
     for i in range(eigvec.shape[0]):
         eigvec[i] = eigvec[i] / nor[i]
     eigvec = eigvec.T
-    eigval = np.array([], dtype=np.float32)
-    for i in range(numD.shape[0]):
-        eigval = np.append(eigval, numD[i][i])
+    eigval = np.diag(numD)
     return eigval, eigvec
 
 # Algoritma SVD
