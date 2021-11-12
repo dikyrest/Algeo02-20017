@@ -1,37 +1,43 @@
 import numpy as np
-import numpy.linalg
-import math
+import sympy as sp
 from PIL import Image
 
 # FUNCTION DEFINTIONS:
+# Mencari nilai eigen dan vektor eigen
+def find_eig(A):
+    M = sp.Matrix(A)
+    E,D = M.diagonalize()
+    numE = np.array(E, dtype=np.float32)
+    numD = np.array(D, dtype=np.float32)
+    numD = numD[::-1, ::-1]
+    eigvec = numE[:, ::-1]
+    eigvec = eigvec.T
+    nor = np.linalg.norm(eigvec, axis=1)
+    for i in range(eigvec.shape[0]):
+        eigvec[i] = eigvec[i] / nor[i]
+    eigvec = eigvec.T
+    eigval = np.array([], dtype=np.float32)
+    for i in range(numD.shape[0]):
+        eigval = np.append(eigval, numD[i][i])
+    return eigval, eigvec
+
+# Algoritma SVD
+def SVD(A):
+    AAt = np.dot(A, A.T)
+    lval, lvec = find_eig(AAt)
+    
+    AtA = np.dot(A.T, A)
+    rval, rvec = find_eig(AtA)
+    
+    row = A.shape[0]
+    col = A.shape[1]
+    sigma = np.zeros((row, col))
+    for i in range(min(row, col)):
+        sigma[i][i] = rval[i]**(1/2)
+
+    return [lvec, sigma, rvec.T]
+
 # Membuka gambar dan mengembalikan matriks berdasarkan channel (Red, Green, dan Blue)
-# Mencari nilai eigen
-def find_eig_qr(A):
-    pQ = np.eye(A.shape[0])
-    X=A.copy()
-    for i in range(100):
-            Q,R = np.linalg.qr(X)
-            pQ = np.dot(pQ,Q)
-            X = np.dot(R,Q)
-    return np.diag(X), pQ
-
-def SVD(matrix):
-    singular_kiri_raw=np.dot(matrix,matrix.transpose())
-    left_eigen_values,left_eigen_vector=find_eig_qr(singular_kiri_raw)
-    
-    singular_kanan_raw=np.dot(matrix.transpose(),matrix)
-    right_eigen_values,right_eigen_vector=find_eig_qr(singular_kanan_raw)
-    
-    sigma=[[0 for i in range(len(matrix[0]))] for j in range(len(matrix))]
-    for i in range(0,len(matrix)):
-        for j in range(0,len(matrix[0])):
-            if(right_eigen_values[i]>0 and i==j):
-                sigma[i][j]=math.sqrt(right_eigen_values[i])
-    print(len(left_eigen_vector))
-    print(left_eigen_vector)
-    return [left_eigen_vector,sigma,right_eigen_vector.transpose()]
-
-
 def openImage(imagePath):
     imageOrigin = Image.open(imagePath)
     imageMatriks = np.array(imageOrigin)
@@ -53,8 +59,8 @@ def compressSingleChannel(channelDataMatrix, singularValuesLimit):
 print('*** Image Compression Using SVD Method ***\n')
 
 # Input nama file
-#filename = input("Masukkan nama file: ")
-matriksMerah, matriksHijau, matriksBiru, originalImage = openImage("lena.png")
+filename = input("Masukkan nama file: ")
+matriksMerah, matriksHijau, matriksBiru, originalImage = openImage(filename)
 
 # Image width and height
 imageWidth, imageHeight = originalImage.size
