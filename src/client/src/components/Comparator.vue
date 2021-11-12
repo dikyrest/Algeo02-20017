@@ -1,15 +1,20 @@
 <script setup>
-import { NCard, NButton, NIcon } from 'naive-ui'
+import { NCard, NButton, NIcon, NAlert } from 'naive-ui'
 import { ImageArrowCounterclockwise24Regular as ImageIcon } from '@vicons/fluent'
 import { ArrowDownload16Regular as DownloadIcon } from '@vicons/fluent'
+import { ArrowClockwise16Regular as RefreshIcon } from '@vicons/fluent'
+import { toRefs } from '@vue/reactivity'
 
 const props = defineProps({
   beforeImg: String,
   afterImg: String,
   name: String,
+  isError: Boolean,
 })
 
-const emit = defineEmits(['reset', 'download'])
+const { beforeImg, afterImg, name, isError } = toRefs(props)
+
+const emit = defineEmits(['reset', 'retry'])
 
 </script>
 
@@ -27,9 +32,11 @@ const emit = defineEmits(['reset', 'download'])
       segmented
       class="comparator-col"
     >
-      <img :src="props.beforeImg" />
+      <div class="comparator-img">
+        <img :src="beforeImg" />
+      </div>
       <template #footer>
-        <NButton type="error" @click="(e) => emit('reset', e)">
+        <NButton type="error" @click="() => emit('reset')">
           <template #icon>
             <NIcon>
               <ImageIcon />
@@ -51,25 +58,42 @@ const emit = defineEmits(['reset', 'download'])
       segmented
       class="comparator-col"
     >
-      <template #header-extra>kompresi: 5 detik</template>
-      <img :src="props.afterImg" />
+      <template v-if="!isError" #header-extra>kompresi: 5 detik</template>
+      <div class="comparator-img">
+        <img :src="isError ? beforeImg : afterImg" :class="isError ? 'error' : ''" />
+      </div>
+      <div v-if="isError" class="error-msg">
+        <NAlert title="Kompresi Gagal" type="error" class="alert">Silakan mencoba kembali.</NAlert>
+      </div>
       <template #footer>
-        <a :href="props.afterImg" :download="props.name" target="__blank">
-          <NButton type="primary">
+        <template v-if="isError">
+          <NButton type="info" @click="() => emit('retry')">
             <template #icon>
               <NIcon>
-                <DownloadIcon />
+                <RefreshIcon />
               </NIcon>
             </template>
-            Unduh
+            Coba lagi
           </NButton>
-        </a>
+        </template>
+        <template v-else>
+          <a :href="afterImg" :download="name" target="__blank">
+            <NButton type="primary">
+              <template #icon>
+                <NIcon>
+                  <DownloadIcon />
+                </NIcon>
+              </template>
+              Unduh
+            </NButton>
+          </a>
+        </template>
       </template>
     </NCard>
   </div>
 </template>
 
-<style scoped>
+<style scoped lang="scss">
 .comparator {
   width: 100%;
   height: 100%;
@@ -81,16 +105,37 @@ const emit = defineEmits(['reset', 'download'])
 .comparator-col {
   flex-basis: 350px;
   flex-grow: 1;
+  position: relative;
+}
+
+.comparator-img {
+  overflow: hidden;
 }
 
 img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+
+  &.error {
+    filter: blur(3px);
+  }
 }
 
 a {
   color: unset;
   text-decoration: none;
+}
+
+.error-msg {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  &,
+  &.alert {
+    width: calc(90%);
+  }
 }
 </style>
