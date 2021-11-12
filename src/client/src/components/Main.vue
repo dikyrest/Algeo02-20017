@@ -32,16 +32,20 @@ const isLoading = ref(false)
 const isError = ref(false)
 
 const request = async () => {
-  isLoading.value = true
+  if (!isLoading.value) {
+    isLoading.value = true
+    const requestRate = rate.value
 
-  try {
-    const compressed = await getCompressedImage(file)
-    afterImg.value = URL.createObjectURL(compressed.file)
-  } catch (e) {
-    isError.value = true
-  } finally {
-    isLoading.value = false
-    isCompressing.value = true
+    try {
+      const compressed = await getCompressedImage(file)
+      afterImg.value = URL.createObjectURL(compressed.file)
+    } catch (e) {
+      isError.value = true
+    } finally {
+      rate.value = requestRate
+      isLoading.value = false
+      isCompressing.value = true
+    }
   }
 }
 
