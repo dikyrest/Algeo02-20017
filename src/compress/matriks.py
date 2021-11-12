@@ -1,24 +1,10 @@
 import numpy as np
+import numpy.linalg
+import math
 from PIL import Image
 
 # FUNCTION DEFINTIONS:
 # Membuka gambar dan mengembalikan matriks berdasarkan channel (Red, Green, dan Blue)
-def openImage(imagePath):
-    imageOrigin = Image.open(imagePath)
-    imageMatriks = np.array(imageOrigin)
-    return [imageMatriks[:, :, 0], imageMatriks[:, :, 1], imageMatriks[:, :, 2], imageOrigin]
-
-# Kompresi gambar dengan single channel
-def compressSingleChannel(channelDataMatrix, singularValuesLimit):
-    uChannel, sChannel, vhChannel = np.linalg.svd(channelDataMatrix) #jabarin SVD nya
-    aChannelCompressed = np.zeros((channelDataMatrix.shape[0], channelDataMatrix.shape[1]))
-    k = singularValuesLimit
-
-    leftSide = np.matmul(uChannel[:, 0:k], np.diag(sChannel)[0:k, 0:k])
-    aChannelCompressedInner = np.matmul(leftSide, vhChannel[0:k, :])
-    aChannelCompressed = aChannelCompressedInner.astype('uint8')
-    return aChannelCompressed
-
 # Mencari nilai eigen
 def find_eig_qr(A):
     pQ = np.eye(A.shape[0])
@@ -28,6 +14,40 @@ def find_eig_qr(A):
             pQ = np.dot(pQ,Q)
             X = np.dot(R,Q)
     return np.diag(X), pQ
+
+def SVD(matrix):
+    singular_kiri_raw=np.dot(matrix,matrix.transpose())
+    left_eigen_values,left_eigen_vector=find_eig_qr(singular_kiri_raw)
+    
+    singular_kanan_raw=np.dot(matrix.transpose(),matrix)
+    right_eigen_values,right_eigen_vector=find_eig_qr(singular_kanan_raw)
+    
+    sigma=[[0 for i in range(len(matrix[0]))] for j in range(len(matrix))]
+    for i in range(0,len(matrix)):
+        for j in range(0,len(matrix[0])):
+            if(right_eigen_values[i]>0 and i==j):
+                sigma[i][j]=math.sqrt(right_eigen_values[i])
+    print(len(left_eigen_vector))
+    print(left_eigen_vector)
+    return [left_eigen_vector,sigma,right_eigen_vector.transpose()]
+
+
+def openImage(imagePath):
+    imageOrigin = Image.open(imagePath)
+    imageMatriks = np.array(imageOrigin)
+    return [imageMatriks[:, :, 0], imageMatriks[:, :, 1], imageMatriks[:, :, 2], imageOrigin]
+
+# Kompresi gambar dengan single channel
+def compressSingleChannel(channelDataMatrix, singularValuesLimit):
+    uChannel, sChannel, vhChannel = SVD(channelDataMatrix) #np.linalg.svd(channelDataMatrix) #jabarin SVD nya
+    aChannelCompressed = np.zeros((channelDataMatrix.shape[0], channelDataMatrix.shape[1]))
+    k = singularValuesLimit
+
+    leftSide = np.matmul(uChannel[:, 0:k], np.diag(sChannel)[0:k, 0:k])
+    aChannelCompressedInner = np.matmul(leftSide, vhChannel[0:k, :])
+    aChannelCompressed = aChannelCompressedInner.astype('uint8')
+    return aChannelCompressed
+
 
 # MAIN PROGRAM:
 print('*** Image Compression Using SVD Method ***\n')
