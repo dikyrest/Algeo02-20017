@@ -19,7 +19,7 @@ const value = ref(props.value)
     <NSlider
       v-model:value="value"
       :format-tooltip="value => value + '%'"
-      @update-value="emit('update:value', value)"
+      @update:value="emit('update:value', value)"
     />
   </div>
 </template>

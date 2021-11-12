@@ -4,29 +4,38 @@ import RateInput from './RateInput.vue'
 import FileInput from './FileInput.vue'
 import Comparator from './Comparator.vue'
 
-import { ref } from '@vue/reactivity'
+import { ref, watch } from 'vue'
 import { getCompressedImage } from '../services/api'
+import { debounce } from '../helpers/debounce'
 
 const rate = ref(50)
-const file = ref('')
+const onRateChange = debounce((value) => {
+  if (file) {
+    request()
+  }
+}, 1000)
+
+let file = null
+const fname = ref('')
 const beforeImg = ref('')
 const afterImg = ref('')
+
+const onFileChange = (info) => {
+  file = info.file.file
+  fname.value = info.file.name
+  beforeImg.value = URL.createObjectURL(file)
+  request()
+}
 
 const isCompressing = ref(false)
 const isLoading = ref(false)
 const isError = ref(false)
 
-const onFileChange = (info) => {
-  file.value = info.file
-  beforeImg.value = URL.createObjectURL(file.value.file)
-  request()
-}
-
 const request = async () => {
   isLoading.value = true
 
   try {
-    const compressed = await getCompressedImage(file.value.file)
+    const compressed = await getCompressedImage(file)
     afterImg.value = URL.createObjectURL(compressed.file)
   } catch (e) {
     isError.value = true
@@ -37,10 +46,12 @@ const request = async () => {
 }
 
 const reset = () => {
+  file = null
   URL.revokeObjectURL(beforeImg.value)
   URL.revokeObjectURL(afterImg.value)
   beforeImg.value = ''
   afterImg.value = ''
+  fname.value = ''
   isCompressing.value = false
 }
 </script>
@@ -48,7 +59,7 @@ const reset = () => {
 <template>
   <main>
     <NSpin :show="isLoading">
-      <RateInput v-model:value="rate" :disabled="isLoading" />
+      <RateInput v-model:value="rate" @update:value="onRateChange" />
       <template v-if="!isCompressing">
         <NMessageProvider>
           <FileInput @change="onFileChange" />
@@ -56,7 +67,7 @@ const reset = () => {
       </template>
       <template v-else>
         <Comparator
-          :name="file.name"
+          :name="fname"
           :beforeImg="beforeImg"
           :afterImg="afterImg"
           :isError="isError"
