@@ -61,9 +61,9 @@ const emit = defineEmits(['reset', 'retry'])
       <template v-if="!isError" #header-extra>kompresi: 5 detik</template>
       <div class="comparator-img">
         <img :src="isError ? beforeImg : afterImg" :class="isError ? 'error' : ''" />
-      </div>
-      <div v-if="isError" class="error-msg">
-        <NAlert title="Kompresi Gagal" type="error" class="alert">Silakan mencoba kembali.</NAlert>
+        <div v-if="isError" class="error-msg">
+          <NAlert title="Kompresi Gagal" type="error" class="alert">Silakan mencoba kembali.</NAlert>
+        </div>
       </div>
       <template #footer>
         <template v-if="isError">
@@ -105,21 +105,21 @@ const emit = defineEmits(['reset', 'retry'])
 .comparator-col {
   flex-basis: 350px;
   flex-grow: 1;
-  position: relative;
 }
 
 .comparator-img {
+  position: relative;
+  width: 100%;
+  height: 100%;
   overflow: hidden;
+  background: url("/assets/images/tile.png");
+  background-size: auto 30px;
 }
 
 img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-
-  &.error {
-    filter: blur(3px);
-  }
 }
 
 a {
@@ -129,13 +129,19 @@ a {
 
 .error-msg {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
 
-  &,
-  &.alert {
-    width: calc(90%);
+  .alert {
+    margin: 0 15px;
   }
 }
 </style>
