@@ -16,9 +16,7 @@ def compressImage(file: FileStorage, ratio: int) -> BytesIO :
 
     matriksMerah, matriksHijau, matriksBiru = imageRGB(image)
 
-    has_alpha = image.mode == 'RGBA'
     imageWidth, imageHeight = image.size
-
     mr = imageHeight
     mc = imageWidth
     originalSize = mr * mc * 3
@@ -39,6 +37,11 @@ def compressImage(file: FileStorage, ratio: int) -> BytesIO :
 
     # Membuat matriks RGB
     newImage = Image.merge("RGB", (imr, img, imb))
+
+    # Preserve alpha
+    if image.mode == 'RGBA':
+        alpha = image.split()[-1]
+        newImage.putalpha(alpha)
 
     img_io = BytesIO()
     newImage.save(img_io, img_formats[file.mimetype].upper())
