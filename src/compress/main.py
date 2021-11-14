@@ -2,6 +2,7 @@ import numpy as np
 from PIL import Image
 
 # FUNCTION DEFINTIONS:
+# Mengembalikan nilai eigen dan vektor eigen dari sebuah matriks
 def find_eig(A):
     pQ = np.eye(A.shape[0])
     X = A.copy()
@@ -12,6 +13,7 @@ def find_eig(A):
 
     return np.diag(X), pQ
 
+# Algoritma SVD menghasilkan matriks U, sigma, dan Vt
 def svd(A):
     At = np.transpose(A)
     AAt = np.dot(A, At)
@@ -24,6 +26,7 @@ def svd(A):
 
     return lvec, sigma, rvec.T
 
+# Mengubah gambar menjadi matriks RGB
 def openImage(imagePath):
     imageOrigin = Image.open(imagePath)
     imageMatriks = np.array(imageOrigin).astype(float)
