@@ -19,6 +19,7 @@ const onRateChange = debounce((value) => {
 const data = reactive({
   file: null,
   compressedFile: null,
+  time: 0,
   fname: '',
   beforeUrl: '',
   afterUrl: '',
@@ -46,6 +47,12 @@ const request = async () => {
     try {
       const compressed = await getCompressedImage(data.file, requestRate)
       data.compressedFile = compressed.file
+      data.time = compressed.time
+
+      if (data.afterUrl) {
+        URL.revokeObjectURL(data.afterUrl)
+      }
+
       data.afterUrl = URL.createObjectURL(compressed.file)
       state.isError = false
     } catch (e) {
@@ -86,6 +93,7 @@ const compSize = computed(() => getFileSize(data.compressedFile))
           :afterImg="data.afterUrl"
           :beforeComment="imgSize"
           :afterComment="compSize"
+          :time="data.time"
           :isError="state.isError"
           @reset="reset"
           @retry="request"

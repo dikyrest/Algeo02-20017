@@ -11,6 +11,7 @@ const props = defineProps({
   beforeComment: String,
   afterComment: String,
   name: String,
+  time: Number,
   isError: Boolean,
 })
 
@@ -57,6 +58,7 @@ const emit = defineEmits(['reset', 'retry'])
         padding: '10px',
         display: 'flex',
         justifyContent: 'flex-end',
+        alignItems: 'center',
       }"
       segmented
       class="comparator-col"
@@ -80,6 +82,7 @@ const emit = defineEmits(['reset', 'retry'])
           </NButton>
         </template>
         <template v-else>
+          <div v-if="time" style="flex-grow: 1;">{{ time }} detik</div>
           <a :href="afterImg" :download="name" target="__blank">
             <NButton type="primary">
               <template #icon>
