@@ -2,15 +2,39 @@ import numpy as np
 from PIL import Image
 
 # FUNCTION DEFINTIONS:
-# Membuka gambar dan mengembalikan matriks berdasarkan channel (Red, Green, dan Blue)
+# Mengembalikan nilai eigen dan vektor eigen dari sebuah matriks
+def find_eig(A):
+    pQ = np.eye(A.shape[0])
+    X = A.copy()
+    for i in range(100):
+        Q,R = np.linalg.qr(X)
+        pQ = np.dot(pQ,Q)
+        X = np.dot(R, Q)
+
+    return np.diag(X), pQ
+
+# Algoritma SVD menghasilkan matriks U, sigma, dan Vt
+def svd(A):
+    At = np.transpose(A)
+    AAt = np.dot(A, At)
+    lval, lvec = find_eig(AAt)
+
+    AtA = np.dot(At, A)
+    rval, rvec = find_eig(AtA)
+
+    sigma = np.sqrt(rval)
+
+    return lvec, sigma, rvec.T
+
+# Mengubah gambar menjadi matriks RGB
 def openImage(imagePath):
     imageOrigin = Image.open(imagePath)
-    imageMatriks = np.array(imageOrigin)
-    return [imageMatriks[:, :, 0], imageMatriks[:, :, 1], imageMatriks[:, :, 2], imageOrigin]
+    imageMatriks = np.array(imageOrigin).astype(float)
+    return imageMatriks[:, :, 0], imageMatriks[:, :, 1], imageMatriks[:, :, 2], imageOrigin
 
 # Kompresi gambar dengan single channel
 def compressSingleChannel(channelDataMatrix, singularValuesLimit):
-    uChannel, sChannel, vhChannel = np.linalg.svd(channelDataMatrix) #jabarin SVD nya
+    uChannel, sChannel, vhChannel = svd(channelDataMatrix) #np.linalg.svd(channelDataMatrix) #jabarin SVD nya
     aChannelCompressed = np.zeros((channelDataMatrix.shape[0], channelDataMatrix.shape[1]))
     k = singularValuesLimit
 
@@ -19,22 +43,13 @@ def compressSingleChannel(channelDataMatrix, singularValuesLimit):
     aChannelCompressed = aChannelCompressedInner.astype('uint8')
     return aChannelCompressed
 
-# Mencari nilai eigen
-def find_eig_qr(A):
-    pQ = np.eye(A.shape[0])
-    X=A.copy()
-    for i in range(100):
-            Q,R = np.linalg.qr(X)
-            pQ = np.dot(pQ,Q)
-            X = np.dot(R,Q)
-    return np.diag(X), pQ
 
 # MAIN PROGRAM:
 print('*** Image Compression Using SVD Method ***\n')
 
 # Input nama file
-#filename = input("Masukkan nama file: ")
-matriksMerah, matriksHijau, matriksBiru, originalImage = openImage("lena.png")
+filename = input("Masukkan nama file: ")
+matriksMerah, matriksHijau, matriksBiru, originalImage = openImage(filename)
 
 # Image width and height
 imageWidth, imageHeight = originalImage.size
