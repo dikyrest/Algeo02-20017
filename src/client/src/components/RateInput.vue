@@ -1,6 +1,6 @@
 <script setup>
-import { toRef, ref } from '@vue/reactivity';
-import { NSlider } from 'naive-ui'
+import { toRef } from '@vue/reactivity';
+import { NSlider, NInputNumber } from 'naive-ui'
 
 const emit = defineEmits(['update:value'])
 const props = defineProps({
@@ -15,12 +15,14 @@ const value = toRef(props, 'value')
 
 <template>
   <div class="rate-input">
-    <div>Tingkat kompresi: {{ value }}%</div>
-    <NSlider
+    <div>Tingkat kompresi:</div>
+    <NInputNumber
+      :show-button="false"
       :value="value"
-      :format-tooltip="value => value + '%'"
       @update:value="(v) => emit('update:value', v)"
-    />
+    >
+      <template #suffix>%</template>
+    </NInputNumber>
   </div>
 </template>
 

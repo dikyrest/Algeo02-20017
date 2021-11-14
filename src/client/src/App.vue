@@ -1,15 +1,24 @@
 <script setup>
 import { NConfigProvider, NGlobalStyle } from 'naive-ui'
+import { useOsTheme, darkTheme } from 'naive-ui'
+import { computed } from 'vue'
+
 import Main from './components/Main.vue'
+
+const osThemeRef = useOsTheme()
+const theme = computed(() => (osThemeRef.value === 'dark' ? darkTheme : null))
 </script>
 
 <template>
-  <NConfigProvider abstract>
+  <NConfigProvider abstract :theme="theme">
     <NGlobalStyle />
     <div class="view">
       <header>
         <h1>Kompres Air&nbsp;Hangat</h1>
-        <p>Kompresor&nbsp;gambar yang&nbsp;sangat&nbsp;baik.</p>
+        <p>
+          Kompresor&nbsp;gambar&nbsp;dengan
+          Singular&nbsp;Value&nbsp;Decomposition.
+        </p>
       </header>
       <Main />
       <footer>
@@ -64,7 +73,7 @@ header {
   }
 
   p {
-    margin: 10px 0 0 0;
+    margin: 20px 0 0 0;
     font-size: 16px;
   }
 }

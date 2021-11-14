@@ -1,6 +1,6 @@
 from flask import Flask, request, send_from_directory, send_file, make_response
 from flask_cors import CORS
-from time import process_time
+from time import perf_counter
 
 from compress.lib import compressImage
 
@@ -20,9 +20,9 @@ def compress_route():
         file = request.files['file']
         ratio = int(request.form['rate'])
 
-        startTime = process_time()
+        startTime = perf_counter()
         result = compressImage(file, ratio)
-        endTime = process_time()
+        endTime = perf_counter()
 
         response = make_response(send_file(result, mimetype=file.mimetype))
         response.headers['Compress-Time'] = endTime - startTime

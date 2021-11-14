@@ -1,5 +1,4 @@
 import Axios from 'axios'
-import { getFileSize } from '../helpers/file'
 
 const instance = Axios.create({
   baseURL: '__API_BASE__',

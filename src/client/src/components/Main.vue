@@ -14,7 +14,7 @@ const onRateChange = debounce((value) => {
   if (data.file) {
     request()
   }
-}, 500)
+}, 1000)
 
 const data = reactive({
   file: null,

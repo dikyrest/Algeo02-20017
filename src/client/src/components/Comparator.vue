@@ -87,7 +87,7 @@ const emit = defineEmits(['reset', 'retry'])
             <NIcon size="24">
               <ClockIcon />
             </NIcon>
-            <span>{{ time }} detik</span>
+            <span>{{ time.toFixed(3) }} detik</span>
           </div>
           <a :href="afterImg" :download="name" target="__blank">
             <NButton type="primary">
@@ -124,7 +124,7 @@ const emit = defineEmits(['reset', 'retry'])
   width: 100%;
   height: 100%;
   overflow: hidden;
-  background: url("/assets/images/tile.png");
+  background: url("/assets/images/tile.png") white;
   background-size: auto 30px;
 }
 
