@@ -3,6 +3,7 @@ import { NCard, NButton, NIcon, NAlert } from 'naive-ui'
 import { ImageArrowCounterclockwise24Regular as ImageIcon } from '@vicons/fluent'
 import { ArrowDownload16Regular as DownloadIcon } from '@vicons/fluent'
 import { ArrowClockwise16Regular as RefreshIcon } from '@vicons/fluent'
+import { Clock20Regular as ClockIcon } from '@vicons/fluent'
 import { toRefs } from '@vue/reactivity'
 
 const props = defineProps({
@@ -82,7 +83,12 @@ const emit = defineEmits(['reset', 'retry'])
           </NButton>
         </template>
         <template v-else>
-          <div v-if="time" style="flex-grow: 1;">{{ time }} detik</div>
+          <div v-if="time" class="comparator-duration">
+            <NIcon size="24">
+              <ClockIcon />
+            </NIcon>
+            <span>{{ time }} detik</span>
+          </div>
           <a :href="afterImg" :download="name" target="__blank">
             <NButton type="primary">
               <template #icon>
@@ -131,6 +137,16 @@ img {
 a {
   color: unset;
   text-decoration: none;
+}
+
+.comparator-duration {
+  flex-grow: 1;
+  display: flex;
+  align-items: center;
+
+  span {
+    margin-left: 5px;
+  }
 }
 
 .error-msg {
