@@ -9,7 +9,7 @@ import { getCompressedImage } from '../services/api'
 import { debounce } from '../helpers/debounce'
 import { getFileSize } from '../helpers/file'
 
-const rate = ref(50)
+const rate = ref(75)
 const onRateChange = debounce((value) => {
   if (data.file) {
     request()
@@ -99,6 +99,7 @@ const compSize = computed(() => getFileSize(data.compressedFile))
           @retry="request"
         />
       </template>
+      <template #description>Melakukan kompresi...</template>
     </NSpin>
   </main>
 </template>
