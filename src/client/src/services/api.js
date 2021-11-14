@@ -23,6 +23,6 @@ export async function getCompressedImage (file, rate) {
 
   return {
     file: response.data,
-    time: response.headers['compress-time'],
+    time: Number(response.headers['compress-time']),
   }
 }

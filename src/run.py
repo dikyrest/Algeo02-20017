@@ -8,7 +8,11 @@ app = Flask(__name__,
             static_folder=None)
 
 cors = CORS(app,
-            resources={ r'/api/*' : { 'origins' : '*' } })
+            resources={
+                r'/api/*' : {
+                    'origins' : '*',
+                    'expose_headers': ['Compress-Time']
+            }})
 
 @app.route('/api/compress', methods=['POST'])
 def compress_route():
@@ -21,7 +25,7 @@ def compress_route():
         endTime = process_time()
 
         response = make_response(send_file(result, mimetype=file.mimetype))
-        response.headers['compress-time'] = endTime - startTime
+        response.headers['Compress-Time'] = endTime - startTime
         return response
     except:
         return '', 501
