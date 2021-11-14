@@ -8,6 +8,8 @@ import { toRefs } from '@vue/reactivity'
 const props = defineProps({
   beforeImg: String,
   afterImg: String,
+  beforeComment: String,
+  afterComment: String,
   name: String,
   isError: Boolean,
 })
@@ -32,6 +34,7 @@ const emit = defineEmits(['reset', 'retry'])
       segmented
       class="comparator-col"
     >
+      <template #header-extra>{{ beforeComment }}</template>
       <div class="comparator-img">
         <img :src="beforeImg" />
       </div>
@@ -58,7 +61,7 @@ const emit = defineEmits(['reset', 'retry'])
       segmented
       class="comparator-col"
     >
-      <template v-if="!isError" #header-extra>kompresi: 5 detik</template>
+      <template v-if="!isError" #header-extra>{{ afterComment }}</template>
       <div class="comparator-img">
         <img :src="isError ? beforeImg : afterImg" :class="isError ? 'error' : ''" />
         <div v-if="isError" class="error-msg">
