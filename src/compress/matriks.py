@@ -1,49 +1,37 @@
 import numpy as np
-import sympy as sp
 from PIL import Image
 
 # FUNCTION DEFINTIONS:
-# Mencari nilai eigen dan vektor eigen
 def find_eig(A):
-    M = sp.Matrix(A)
-    E,D = M.diagonalize()
-    numE = np.array(E, dtype=np.float32)
-    numD = np.array(D, dtype=np.float32)
-    numD = numD[::-1, ::-1]
-    eigvec = numE[:, ::-1]
-    eigvec = eigvec.T
-    nor = np.linalg.norm(eigvec, axis=1)
-    for i in range(eigvec.shape[0]):
-        eigvec[i] = eigvec[i] / nor[i]
-    eigvec = eigvec.T
-    eigval = np.diag(numD)
-    return eigval, eigvec
+    pQ = np.eye(A.shape[0])
+    X = A.copy()
+    for i in range(100):
+        Q,R = np.linalg.qr(X)
+        pQ = np.dot(pQ,Q)
+        X = np.dot(R, Q)
 
-# Algoritma SVD
-def SVD(A):
-    AAt = np.dot(A, A.T)
+    return np.diag(X), pQ
+
+def svd(A):
+    At = np.transpose(A)
+    AAt = np.dot(A, At)
     lval, lvec = find_eig(AAt)
-    
-    AtA = np.dot(A.T, A)
+
+    AtA = np.dot(At, A)
     rval, rvec = find_eig(AtA)
-    
-    row = A.shape[0]
-    col = A.shape[1]
-    sigma = np.zeros((row, col))
-    for i in range(min(row, col)):
-        sigma[i][i] = rval[i]**(1/2)
 
-    return [lvec, sigma, rvec.T]
+    sigma = np.sqrt(rval)
 
-# Membuka gambar dan mengembalikan matriks berdasarkan channel (Red, Green, dan Blue)
+    return lvec, sigma, rvec.T
+
 def openImage(imagePath):
     imageOrigin = Image.open(imagePath)
-    imageMatriks = np.array(imageOrigin)
-    return [imageMatriks[:, :, 0], imageMatriks[:, :, 1], imageMatriks[:, :, 2], imageOrigin]
+    imageMatriks = np.array(imageOrigin).astype(float)
+    return imageMatriks[:, :, 0], imageMatriks[:, :, 1], imageMatriks[:, :, 2], imageOrigin
 
 # Kompresi gambar dengan single channel
 def compressSingleChannel(channelDataMatrix, singularValuesLimit):
-    uChannel, sChannel, vhChannel = SVD(channelDataMatrix) #np.linalg.svd(channelDataMatrix) #jabarin SVD nya
+    uChannel, sChannel, vhChannel = svd(channelDataMatrix) #np.linalg.svd(channelDataMatrix) #jabarin SVD nya
     aChannelCompressed = np.zeros((channelDataMatrix.shape[0], channelDataMatrix.shape[1]))
     k = singularValuesLimit
 
