@@ -1,7 +1,51 @@
+from werkzeug.datastructures import FileStorage
+from io import BytesIO
 import numpy as np
 from PIL import Image
 
-# FUNCTION DEFINTIONS:
+img_formats = {
+    "image/jpeg": "JPEG",
+    "image/png": "PNG",
+    "image/gif": "GIF",
+    "image/bmp": "BMP",
+}
+
+# MAIN FUNCTION
+def compressImage(file: FileStorage, ratio: int) -> BytesIO :
+    image = Image.open(file.stream)
+
+    matriksMerah, matriksHijau, matriksBiru = imageRGB(image)
+
+    has_alpha = image.mode == 'RGBA'
+    imageWidth, imageHeight = image.size
+
+    mr = imageHeight
+    mc = imageWidth
+    originalSize = mr * mc * 3
+
+    # Menghitung ukuran gambar setelah kompresi
+    compressedSize = int ((100 - ratio) / 100 * originalSize)
+
+    # Menghitung jumlah nilai singular yang dapat digunakan
+    singularValuesLimit = int (compressedSize / (3 * (1 + mr + mc)))
+
+    aRedCompressed = compressSingleChannel(matriksMerah, singularValuesLimit)
+    aGreenCompressed = compressSingleChannel(matriksHijau, singularValuesLimit)
+    aBlueCompressed = compressSingleChannel(matriksBiru, singularValuesLimit)
+
+    imr = Image.fromarray(aRedCompressed, mode=None)
+    img = Image.fromarray(aGreenCompressed, mode=None)
+    imb = Image.fromarray(aBlueCompressed, mode=None)
+
+    # Membuat matriks RGB
+    newImage = Image.merge("RGB", (imr, img, imb))
+
+    img_io = BytesIO()
+    newImage.save(img_io, img_formats[file.mimetype].upper())
+    img_io.seek(0)
+    return img_io
+
+# MATH FUNCTIONS
 # Mengembalikan nilai eigen dan vektor eigen dari sebuah matriks
 def find_eig(A):
     pQ = np.eye(A.shape[0])
@@ -26,15 +70,15 @@ def svd(A):
 
     return lvec, sigma, rvec.T
 
+# IMAGE FUNCTIONS
 # Mengubah gambar menjadi matriks RGB
-def openImage(imagePath):
-    imageOrigin = Image.open(imagePath)
-    imageMatriks = np.array(imageOrigin).astype(float)
-    return imageMatriks[:, :, 0], imageMatriks[:, :, 1], imageMatriks[:, :, 2], imageOrigin
+def imageRGB(image: Image):
+    imageMatriks = np.array(image).astype(float)
+    return imageMatriks[:, :, 0], imageMatriks[:, :, 1], imageMatriks[:, :, 2]
 
 # Kompresi gambar dengan single channel
 def compressSingleChannel(channelDataMatrix, singularValuesLimit):
-    uChannel, sChannel, vhChannel = svd(channelDataMatrix) #np.linalg.svd(channelDataMatrix) #jabarin SVD nya
+    uChannel, sChannel, vhChannel = svd(channelDataMatrix)
     aChannelCompressed = np.zeros((channelDataMatrix.shape[0], channelDataMatrix.shape[1]))
     k = singularValuesLimit
 
@@ -42,55 +86,3 @@ def compressSingleChannel(channelDataMatrix, singularValuesLimit):
     aChannelCompressedInner = np.matmul(leftSide, vhChannel[0:k, :])
     aChannelCompressed = aChannelCompressedInner.astype('uint8')
     return aChannelCompressed
-
-
-# MAIN PROGRAM:
-print('*** Image Compression Using SVD Method ***\n')
-
-# Input nama file
-filename = input("Masukkan nama file: ")
-matriksMerah, matriksHijau, matriksBiru, originalImage = openImage(filename)
-
-# Image width and height
-imageWidth, imageHeight = originalImage.size
-
-# Input tingkat kompresi
-ratio = int(input("Masukkan tingkat kompresi: "))
-
-mr = imageHeight
-mc = imageWidth
-originalSize = mr * mc * 3
-
-# Menghitung ukuran gambar setelah kompresi
-compressedSize = int ((100-ratio)/100*originalSize)
-
-# Menghitung jumlah nilai singular yang dapat digunakan
-singularValuesLimit = int (compressedSize/(3*(1 + mr + mc)))
-
-aRedCompressed = compressSingleChannel(matriksMerah, singularValuesLimit)
-aGreenCompressed = compressSingleChannel(matriksHijau, singularValuesLimit)
-aBlueCompressed = compressSingleChannel(matriksBiru, singularValuesLimit)
-
-imr = Image.fromarray(aRedCompressed, mode=None)
-img = Image.fromarray(aGreenCompressed, mode=None)
-imb = Image.fromarray(aBlueCompressed, mode=None)
-
-# Membuat matriks RGB
-newImage = Image.merge("RGB", (imr, img, imb))
-
-# Menampilkan gambar sebelum dan sesudah kompresi
-originalImage.show()
-newImage.show()
-
-# Menampilkan perbandingan ukuran
-print('Original size:', originalSize, 'pixels')
-print('Compressed size:', compressedSize, 'pixels')
-print('Compressed image size is ' + str(ratio) + '% of the original image.')
-
-# Menyimpan gambar
-save = input('Do you wanna save it? (Y/N) ')
-if (save == 'Y'):
-    newfilename = input('Masukkan nama file baru: ')
-    newImage.save(fp=newfilename)
-
-print('DONE - Compressed the image! Over and out!')
