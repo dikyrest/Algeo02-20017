@@ -2,7 +2,7 @@ from flask import Flask, request, send_from_directory, send_file, make_response
 from flask_cors import CORS
 from time import process_time
 
-from compress.main import compressImage
+from compress.lib import compressImage
 
 app = Flask(__name__,
             static_folder=None)
