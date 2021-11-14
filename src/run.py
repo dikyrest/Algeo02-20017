@@ -13,7 +13,8 @@ cors = CORS(app,
 def compress_route():
     try:
         file = request.files['file']
-        result = compressImage(file)
+        ratio = int(request.form['rate'])
+        result = compressImage(file, ratio)
         return send_file(result, mimetype=file.mimetype)
     except:
         return '', 501
