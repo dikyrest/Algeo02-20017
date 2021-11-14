@@ -5,7 +5,13 @@ import { ref } from '@vue/reactivity'
 
 const emit = defineEmits(['change'])
 
-const types = ['image/png', 'image/jpeg', 'image/gif']
+const types = [
+  'image/png',
+  'image/jpeg',
+  'image/gif',
+  'image/bmp',
+]
+
 const draggerClass = ref('')
 const message = useMessage()
 
@@ -37,7 +43,7 @@ const beforeUpload = async ({ file }) => {
         atau&nbsp;geser&nbsp;file&nbsp;gambar&nbsp;Anda
         ke&nbsp;area&nbsp;ini
       </NP>
-      <NP style="margin: 5px 0 0 0;">Format yang didukung: JPEG,&nbsp;PNG,&nbsp;dan&nbsp;GIF</NP>
+      <NP style="margin: 5px 0 0 0;">Format yang didukung: JPEG,&nbsp;PNG, GIF,&nbsp;dan&nbsp;BMP</NP>
     </NUploadDragger>
   </NUpload>
 </template>

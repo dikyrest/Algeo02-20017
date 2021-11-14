@@ -6,12 +6,17 @@ Kelompok 46 Kompres Air Hangat
 - 13520024 Hilya Fadhilah Imania
 - 13520148 Fikri Ihsan Fadhiilah
 
+## Deskripsi Singkat
+
+Sebuah aplikasi web sederhana untuk mengkompresi gambar
+dengan menerapkan prinsip Singular Value Decomposition.
+
 
 ## Library
 
 - Client    : Vue 3, Vite, Naive UI, Axios
 - Server    : Flask, flask_cors
-- Algoritma : numpy
+- Algoritma : numpy, pillow
 
 
 ## Run

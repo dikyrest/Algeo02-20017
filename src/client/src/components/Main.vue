@@ -4,50 +4,102 @@ import RateInput from './RateInput.vue'
 import FileInput from './FileInput.vue'
 import Comparator from './Comparator.vue'
 
-import { ref } from '@vue/reactivity'
+import { ref, reactive, computed } from 'vue'
 import { getCompressedImage } from '../services/api'
+import { debounce } from '../helpers/debounce'
+import { getFileSize } from '../helpers/file'
 
-const rate = ref(50)
-const fname = ref('')
-const beforeImg = ref('')
-const afterImg = ref('')
+const rate = ref(75)
+const onRateChange = debounce((value) => {
+  if (data.file) {
+    request()
+  }
+}, 1000)
 
-const isCompressing = ref(false)
-const isLoading = ref(false)
+const data = reactive({
+  file: null,
+  compressedFile: null,
+  time: 0,
+  fname: '',
+  beforeUrl: '',
+  afterUrl: '',
+})
 
 const onFileChange = ({ file }) => {
-  isLoading.value = true
-  fname.value = file.name
-  beforeImg.value = URL.createObjectURL(file.file)
-  afterImg.value = URL.createObjectURL(file.file)
+  data.file = file.file
+  data.fname = file.name
+  data.beforeUrl = URL.createObjectURL(data.file)
+  data.beforeSize = getFileSize(data.file)
+  request()
+}
 
-  setTimeout(() => {
-    isLoading.value = false
-    isCompressing.value = true
-  }, 1000)
+const state = reactive({
+  isCompressing: false,
+  isLoading: false,
+  isError: false,
+})
+
+const request = async () => {
+  if (!state.isLoading) {
+    state.isLoading = true
+    const requestRate = rate.value
+
+    try {
+      const compressed = await getCompressedImage(data.file, requestRate)
+      data.compressedFile = compressed.file
+      data.time = compressed.time
+
+      if (data.afterUrl) {
+        URL.revokeObjectURL(data.afterUrl)
+      }
+
+      data.afterUrl = URL.createObjectURL(compressed.file)
+      state.isError = false
+    } catch (e) {
+      console.error(e)
+      state.isError = true
+    } finally {
+      rate.value = requestRate
+      state.isLoading = false
+      state.isCompressing = true
+    }
+  }
 }
 
 const reset = () => {
-  URL.revokeObjectURL(beforeImg.value)
-  URL.revokeObjectURL(afterImg.value)
-  beforeImg.value = ''
-  afterImg.value = ''
-  isCompressing.value = false
+  data.file = null
+  URL.revokeObjectURL(data.beforeUrl)
+  URL.revokeObjectURL(data.afterUrl)
+  state.isCompressing = false
 }
+
+const imgSize = computed(() => getFileSize(data.file))
+const compSize = computed(() => getFileSize(data.compressedFile))
 </script>
 
 <template>
   <main>
-    <NSpin :show="isLoading">
-      <RateInput v-model:value="rate" :disabled="isLoading" />
-      <template v-if="!isCompressing">
+    <NSpin :show="state.isLoading">
+      <RateInput v-model:value="rate" @update:value="onRateChange" />
+      <template v-if="!state.isCompressing">
         <NMessageProvider>
           <FileInput @change="onFileChange" />
         </NMessageProvider>
       </template>
       <template v-else>
-        <Comparator :name="fname" :beforeImg="beforeImg" :afterImg="afterImg" @reset="reset" />
+        <Comparator
+          :name="data.fname"
+          :beforeImg="data.beforeUrl"
+          :afterImg="data.afterUrl"
+          :beforeComment="imgSize"
+          :afterComment="compSize"
+          :time="data.time"
+          :isError="state.isError"
+          @reset="reset"
+          @retry="request"
+        />
       </template>
+      <template #description>Melakukan kompresi...</template>
     </NSpin>
   </main>
 </template>

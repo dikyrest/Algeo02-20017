@@ -1,7 +1,7 @@
 import Axios from 'axios'
 
 const instance = Axios.create({
-  timeout: 10000,
+  baseURL: '__API_BASE__',
 })
 
 export async function getCompressedImage (file, rate) {
@@ -22,6 +22,6 @@ export async function getCompressedImage (file, rate) {
 
   return {
     file: response.data,
-    time: response.headers['compress-time'],
+    time: Number(response.headers['compress-time']),
   }
 }
