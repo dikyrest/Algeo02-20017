@@ -22,9 +22,13 @@ def svd(A):
     AtA = np.dot(At, A)
     rval, rvec = find_eig(AtA)
 
+    u = lvec
     sigma = np.sqrt(rval)
+    vt = np.linalg.pinv(sigma)
+    vt = np.dot(vt, np.linalg.pinv(u))
+    vt = np.dot(vt, A)
 
-    return lvec, sigma, rvec.T
+    return u, sigma, vt
 
 # Mengubah gambar menjadi matriks RGB
 def openImage(imagePath):
@@ -34,7 +38,7 @@ def openImage(imagePath):
 
 # Kompresi gambar dengan single channel
 def compressSingleChannel(channelDataMatrix, singularValuesLimit):
-    uChannel, sChannel, vhChannel = svd(channelDataMatrix) #np.linalg.svd(channelDataMatrix) #jabarin SVD nya
+    uChannel, sChannel, vhChannel = np.linalg.svd(channelDataMatrix) #np.linalg.svd(channelDataMatrix) #jabarin SVD nya
     aChannelCompressed = np.zeros((channelDataMatrix.shape[0], channelDataMatrix.shape[1]))
     k = singularValuesLimit
 
