@@ -21,9 +21,17 @@ def svd(A):
 
     AtA = np.dot(At, A)
     rval, rvec = find_eig(AtA)
-
+    
     u = lvec
-    sigma = np.sqrt(rval)
+
+    row = A.shape[0]
+    col = A.shape[1]
+    sigma = np.zeros((row,col))
+
+    rval = np.absolute(rval)
+    for i in range(min(row,col)):
+        sigma[i][i] = np.sqrt(rval[i])
+    
     vt = np.linalg.pinv(sigma)
     vt = np.dot(vt, np.linalg.pinv(u))
     vt = np.dot(vt, A)
@@ -38,11 +46,11 @@ def openImage(imagePath):
 
 # Kompresi gambar dengan single channel
 def compressSingleChannel(channelDataMatrix, singularValuesLimit):
-    uChannel, sChannel, vhChannel = np.linalg.svd(channelDataMatrix) #np.linalg.svd(channelDataMatrix) #jabarin SVD nya
+    uChannel, sChannel, vhChannel = svd(channelDataMatrix) #np.linalg.svd(channelDataMatrix) #jabarin SVD nya
     aChannelCompressed = np.zeros((channelDataMatrix.shape[0], channelDataMatrix.shape[1]))
     k = singularValuesLimit
 
-    leftSide = np.matmul(uChannel[:, 0:k], np.diag(sChannel)[0:k, 0:k])
+    leftSide = np.matmul(uChannel[:, 0:k],sChannel[0:k, 0:k])
     aChannelCompressedInner = np.matmul(leftSide, vhChannel[0:k, :])
     aChannelCompressed = aChannelCompressedInner.astype('uint8')
     return aChannelCompressed
@@ -63,13 +71,13 @@ ratio = int(input("Masukkan tingkat kompresi: "))
 
 mr = imageHeight
 mc = imageWidth
-originalSize = mr * mc * 3
+originalSize = mr * mc
 
 # Menghitung ukuran gambar setelah kompresi
-compressedSize = int ((100-ratio)/100*originalSize)
+compressedSize = int (ratio/100*originalSize)
 
 # Menghitung jumlah nilai singular yang dapat digunakan
-singularValuesLimit = int (compressedSize/(3*(1 + mr + mc)))
+singularValuesLimit = int (compressedSize/(1 + mr + mc))
 
 aRedCompressed = compressSingleChannel(matriksMerah, singularValuesLimit)
 aGreenCompressed = compressSingleChannel(matriksHijau, singularValuesLimit)
